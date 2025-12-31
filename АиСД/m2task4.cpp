@@ -143,11 +143,6 @@ private:
                 {
                     parentNode = minNode;
                     minNode = minNode->leftSubtree;
-                    
-                    if( parentNode )
-                    {
-                        parentNode->leftSubtree = BalanceNode( parentNode->leftSubtree );
-                    }
                 }
                 
                 currentNode->nodeData = minNode->nodeData;

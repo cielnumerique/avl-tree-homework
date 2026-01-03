@@ -102,12 +102,13 @@ public:
     }
 
 private:
-    TreeNode * RemoveNode( TreeNode * currentNode, const T & valueToRemove )
+        TreeNode * RemoveNode( TreeNode * currentNode, const T & valueToRemove )
     {
         if( !currentNode )
         {
             return nullptr;
         }
+        
         if( currentNode->nodeData < valueToRemove )
         {
             currentNode->rightSubtree = RemoveNode( currentNode->rightSubtree, valueToRemove );
@@ -118,54 +119,56 @@ private:
         }
         else
         {
-            if( currentNode->leftSubtree == nullptr && currentNode->rightSubtree == nullptr )
+            if( !currentNode->leftSubtree && !currentNode->rightSubtree )
             {
                 delete currentNode;
                 return nullptr;
             }
-            else if( currentNode->leftSubtree == nullptr && currentNode->rightSubtree != nullptr )
+            else if( !currentNode->leftSubtree )
             {
                 TreeNode * rightChild = currentNode->rightSubtree;
-                currentNode->nodeData = rightChild->nodeData;
-                currentNode->leftSubtree = rightChild->leftSubtree;
-                currentNode->rightSubtree = rightChild->rightSubtree;
-                delete rightChild;
-                return BalanceNode( currentNode );
+                delete currentNode;
+                return rightChild;
             }
-            else if( currentNode->leftSubtree != nullptr && currentNode->rightSubtree == nullptr )
+            else if( !currentNode->rightSubtree )
             {
                 TreeNode * leftChild = currentNode->leftSubtree;
-                currentNode->nodeData = leftChild->nodeData;
-                currentNode->leftSubtree = leftChild->leftSubtree;
-                currentNode->rightSubtree = leftChild->rightSubtree;
-                delete leftChild;
-                return BalanceNode( currentNode );
+                delete currentNode;
+                return leftChild;
             }
             else
             {
-                TreeNode* parentNode = nullptr;
-                TreeNode* minNode = currentNode->rightSubtree;
+                TreeNode * minParent = currentNode;
+                TreeNode * minNode = currentNode->rightSubtree;
                 
                 while( minNode->leftSubtree != nullptr )
                 {
-                    parentNode = minNode;
+                    minParent = minNode;
                     minNode = minNode->leftSubtree;
+                    
+                    if( minParent != currentNode )
+                    {
+                        minParent = BalanceNode( minParent );
+                        if( minParent->leftSubtree == minNode )
+                        {
+                            minParent->leftSubtree = minNode;
+                        }
+                    }
                 }
                 
                 currentNode->nodeData = minNode->nodeData;
                 
-                if( parentNode == nullptr )
+                if( minParent == currentNode )
                 {
-                    currentNode->rightSubtree = minNode->rightSubtree;
+                    currentNode->rightSubtree = RemoveNode( currentNode->rightSubtree, minNode->nodeData );
                 }
                 else
                 {
-                    parentNode->leftSubtree = minNode->rightSubtree;
+                    minParent->leftSubtree = RemoveNode( minParent->leftSubtree, minNode->nodeData );
                 }
-                
-                delete minNode;
             }
         }
+        
         return BalanceNode( currentNode );
     }
 
